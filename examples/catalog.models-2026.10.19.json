@@ -1,0 +1,45 @@
+{
+  "schema": "ams-catalog/1",
+  "kind": "catalog.models",
+  "generated_at": "2026-10-19T23:30:00+08:00",
+  "channel": "stable",
+  "notes": "catalog.models 示例索引（示例 sha256 为占位，正式发布由 CI 扫描模型仓库生成）",
+  "models": [
+    {
+      "id": "rvc.hubert.base",
+      "name": "HuBERT base（RVC 特征）",
+      "size": 189472000,
+      "sha256": "f370000000000000000000000000000000000000000000000000000000000001",
+      "url": "https://github.com/yan-mc/ams-release/releases/download/catalog-2026.10.19/hubert_base.pt",
+      "license": "MIT",
+      "category": "rvc"
+    },
+    {
+      "id": "rvc.rmvpe",
+      "name": "RMVPE 音高模型",
+      "size": 181000000,
+      "sha256": "f370000000000000000000000000000000000000000000000000000000000002",
+      "url": "https://github.com/yan-mc/ams-release/releases/download/catalog-2026.10.19/rmvpe.pt",
+      "license": "MIT（上游缺 LICENSE，待核）",
+      "category": "rvc"
+    },
+    {
+      "id": "pymss.scnet",
+      "name": "pymss SCNet 分离模型",
+      "size": 73400000,
+      "sha256": "f370000000000000000000000000000000000000000000000000000000000003",
+      "url": "https://github.com/yan-mc/ams-release/releases/download/catalog-2026.10.19/scnet.ckpt",
+      "license": "MIT",
+      "category": "pymss"
+    },
+    {
+      "id": "asr.faster-whisper.base",
+      "name": "faster-whisper base（数据集/评测）",
+      "size": 145000000,
+      "sha256": "f370000000000000000000000000000000000000000000000000000000000004",
+      "url": "https://github.com/yan-mc/ams-release/releases/download/catalog-2026.10.19/faster-whisper-base.zip",
+      "license": "MIT",
+      "category": "asr"
+    }
+  ]
+}

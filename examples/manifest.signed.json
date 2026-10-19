@@ -1,21 +1,112 @@
 {
   "schema": "ams-update/1",
   "channel": "stable",
-  "generated_at": "2026-10-19T21:00:00+08:00",
-  "sequence": 1,
+  "generated_at": "2026-10-19T23:30:00+08:00",
+  "expires_at": "2026-11-18T23:30:00+08:00",
+  "sequence": 1287,
+  "min_launcher": "0.1.4",
+  "notes_url": "https://github.com/yan-mc/ams-release/releases/tag/2026.10.19",
+  "withdraw": [
+    "plugin.ams.music.core@0.1.3"
+  ],
   "components": [
     {
-      "id": "plugin.ams.music.trainer",
-      "kind": "plugin",
-      "version": "0.1.0",
-      "url": "https://github.com/yan-mc/ams-release/releases/download/v0.1.0/trainer-0.1.0.tgz",
-      "size": 12345,
-      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "id": "launcher",
+      "kind": "launcher",
+      "version": "0.1.4",
+      "url": "https://github.com/yan-mc/ams-launcher/releases/download/v0.1.4/AMS-Studio_0.1.4_x64-setup.exe",
+      "size": 1448763,
+      "sha256": "a8cbc0760861af127380c666d5c3ee865f3f49b058e2187693a191d03632bfef",
+      "signature_key_id": "ed25519:ams-dev-2026a",
       "requires": {
-        "kernel": ">=0.2.1-rc.2 <0.3.0"
+        "runtime": "webview2"
       },
-      "notes": "示例清单，正式发布前替换"
+      "notes": "启动器自更新包（真实本机构建产物：NSIS 1.38 MiB）"
+    },
+    {
+      "id": "kernel",
+      "kind": "kernel",
+      "version": "0.2.1-rc.2",
+      "url": "https://github.com/yan-mc/ams-harness/releases/download/v0.2.1-rc.2/AMS-Kernel-0.2.1-rc.2-setup.exe",
+      "size": 651247616,
+      "sha256": "641edd76d31a3dee63db406ca35cb5816ee63dafc3581d4d2c9a3af64ccb1463",
+      "signature_key_id": "ed25519:ams-dev-2026a",
+      "requires": {
+        "launcher": ">=0.1.4",
+        "plugins_api": "1.x"
+      },
+      "notes": "【示例占位】内核整包待 M1 打包（体积按 620–650MB 目标估算）"
+    },
+    {
+      "id": "plugin.ams.music.core",
+      "kind": "plugin",
+      "version": "0.2.0",
+      "url": "https://github.com/yan-mc/ams-plugins/releases/download/music.core@0.2.0/ams-music-core-0.2.0.tgz",
+      "mirrors": [
+        "https://mirror.example.com/ams/plugins/ams-music-core-0.2.0.tgz"
+      ],
+      "size": 8037,
+      "sha256": "cb5d215ec00c6cc79393005c74133571d4fde17900ed1d6bc1bb9f3fba54d03e",
+      "signature_key_id": "ed25519:ams-dev-2026a",
+      "requires": {
+        "kernel": ">=0.2.1-rc.2 <0.3.0",
+        "services": {
+          "service.gateway": ">=0.1.0"
+        }
+      },
+      "notes": "真实本机构建产物（ams-plugin-core-0.2.0.tgz）；0.1.3 已在 withdraw 列表"
+    },
+    {
+      "id": "service.gateway",
+      "kind": "service",
+      "version": "0.1.0",
+      "url": "https://github.com/yan-mc/ams-services/releases/download/gateway@0.1.0/gateway-0.1.0.zip",
+      "size": 3276800,
+      "sha256": "ae32762b591e29f518b0e95bf41376095e328585b60c71e5207591225bd7bcd0",
+      "signature_key_id": "ed25519:ams-dev-2026a",
+      "requires": {
+        "runtime": "python-standalone-3.12",
+        "launcher": ">=0.1.0"
+      },
+      "notes": "【示例占位】Gateway 打包产物待 M1 收口（本机源码 0.1.0 已跑通）"
+    },
+    {
+      "id": "service.pymss",
+      "kind": "service",
+      "version": "0.1.0",
+      "url": "https://github.com/yan-mc/ams-services/releases/download/pymss@0.1.0/pymss-0.1.0.zip",
+      "size": 41943040,
+      "sha256": "ddacf3db178c6946477cefe59c821db1086fe1c884ee3e745a8bbd76c80345a4",
+      "signature_key_id": "ed25519:ams-dev-2026a",
+      "requires": {
+        "gateway": ">=0.1.0",
+        "runtime": "python-standalone-3.12",
+        "models": "catalog.models>=2026.10.19"
+      },
+      "notes": "【示例占位】服务包不含 torch 运行时；本机 pymss venv 实测 5.81GB（torch 2.7.1+cu128）"
+    },
+    {
+      "id": "tool.ffmpeg",
+      "kind": "tool",
+      "version": "8.0.1",
+      "url": "https://github.com/yan-mc/ams-release/releases/download/tools-2026.10/ffmpeg-8.0.1-win64-lgpl.zip",
+      "size": 104857600,
+      "sha256": "bd4820d0c430f94abc00182e82d248a58f62b7e22a91e8fd5132acedfb447134",
+      "signature_key_id": "ed25519:ams-dev-2026a",
+      "requires": {},
+      "notes": "【示例占位】LGPL 构建 ffmpeg/ffprobe；安装到安装目录 Tools\\ffmpeg\\8.0.1"
+    },
+    {
+      "id": "catalog.models",
+      "kind": "catalog",
+      "version": "2026.10.19",
+      "url": "https://github.com/yan-mc/ams-release/releases/download/catalog-2026.10.19/models-index.json",
+      "size": 1705,
+      "sha256": "bda55dbe9bacf4a9ad80ad260f5ec8f958fa4581c8faa5e8bd93484a8c63ced9",
+      "signature_key_id": "ed25519:ams-dev-2026a",
+      "requires": {},
+      "notes": "真实示例 catalog 文件（examples/catalog.models-2026.10.19.json 的哈希）"
     }
   ],
-  "signature": "ed25519:Xyk0UKC+qPq5RNxlKVEkqcvhHe/CQ+gUE1z62JWbjH+WSl3XX6nR0QxBXwrTK6wKwbB8sKdBaGBYlwZ5yetFCw=="
+  "signature": "ed25519:i6E0HxsRhhS3SHfq6cRxRTsPFWM9XuRThUiTBsLTwCNHq9XNOtNMJekUkM18NmntDkMQ5bd4lR0o6o8S0HuHBQ=="
 }
