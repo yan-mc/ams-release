@@ -33,3 +33,14 @@ pwsh tools/backup.ps1 -Workspace "F:/Deepseek_harness/AI音乐处理/08_项目�
 ```
 
 对 7 个仓库执行 `git bundle --all` 并 verify，输出到 `_backups/`。
+## 打包脚本
+
+```powershell
+# 默认曼波 voicepack（zip，本地生成，不进 Git）
+pwsh tools/build-voicepack.ps1 -Source "F:/ai歌曲/0 曼波"
+
+# 暂存发布目录（启动器安装包 + voicepack + stage-manifest）
+pwsh tools/stage-release.ps1 -Out "F:/Deepseek_harness/AI音乐处理/09_发布/staging"
+```
+
+产物写入 `09_发布/`（本地发布物，不入库）；`stage-manifest.json` 记录每个文件的 size/sha256。
