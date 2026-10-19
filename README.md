@@ -26,3 +26,10 @@ python tools/manifest.py verify examples/manifest.signed.json --pub keys/public.
 - 签名覆盖“除 signature 外的完整清单”，JSON 规范化（sort_keys + 无空格）。
 - `sequence` 单调递增，启动器用它拒绝回滚；`withdraw` 用于撤回组件。
 - 正式密钥生成后，把 `public.pem` 内置到启动器。
+## 备份脚本
+
+```powershell
+pwsh tools/backup.ps1 -Workspace "F:/Deepseek_harness/AI音乐处理/08_项目代码"
+```
+
+对 7 个仓库执行 `git bundle --all` 并 verify，输出到 `_backups/`。
