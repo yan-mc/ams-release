@@ -1,4 +1,4 @@
-param(
+﻿param(
     [string]$Source = "F:\ai歌曲\0 曼波",
     [string]$Out = "",
     [string]$Name = "曼波"

@@ -44,3 +44,18 @@ pwsh tools/stage-release.ps1 -Out "F:/Deepseek_harness/AI音乐处理/09_发布/
 ```
 
 产物写入 `09_发布/`（本地发布物，不入库）；`stage-manifest.json` 记录每个文件的 size/sha256。
+## 组件 feed（M2）
+
+```powershell
+# 生成 3 个真实组件 + 已签名 feed（默认输出 09_发布/updates）
+pwsh tools/build-components.ps1 -Out "F:/Deepseek_harness/AI音乐处理/09_发布/updates"
+
+# 暂存发布（自动含 0.2.0 安装包、voicepack、updates feed/packages 与 stage-manifest）
+pwsh tools/stage-release.ps1 -Out "F:/Deepseek_harness/AI音乐处理/09_发布/staging"
+```
+
+启动器用 `AMS_COMPONENTS_FEED` 指向 `updates/ams-components.json`；本地包 URL 使用 `file:///`，生产环境替换为 HTTPS 服务器。
+
+## 注意（私有仓库）
+
+GitHub 仓库已改为 Private，release 资产不能被匿名下载；M2 的更新中心使用本地/离线 feed，公网更新服务在 M3 部署。

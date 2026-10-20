@@ -28,7 +28,8 @@ def canonical_bytes(obj):
 
 
 def load_json(path):
-    with open(path, "r", encoding="utf-8") as f:
+    # PowerShell 5.1 写 JSON 时可能带 BOM，用 utf-8-sig 兼容
+    with open(path, "r", encoding="utf-8-sig") as f:
         return json.load(f)
 
 
@@ -68,8 +69,9 @@ def validate_manifest(obj):
             errors.append(tag + ".kind 非法")
         if not isinstance(c.get("version"), str) or not c.get("version"):
             errors.append(tag + ".version 必须为非空字符串")
-        if not isinstance(c.get("url"), str) or not c.get("url").startswith("https://"):
-            errors.append(tag + ".url 必须为 https URL")
+        url = c.get("url")
+        if not isinstance(url, str) or not (url.startswith("https://") or url.startswith("file:///")):
+            errors.append(tag + ".url 必须为 https:// 或 file:/// URL")
         sha = c.get("sha256")
         if not isinstance(sha, str) or len(sha) != 64:
             errors.append(tag + ".sha256 必须为 64 位 hex")

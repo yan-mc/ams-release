@@ -1,4 +1,4 @@
-param(
+﻿param(
     [string]$Out = "F:\Deepseek_harness\AI音乐处理\09_发布\staging",
     [string]$VoiceSource = "F:\ai歌曲\0 曼波"
 )
@@ -17,6 +17,10 @@ if (-not $latestExe -or -not $latestMsi) { throw "未找到 NSIS/MSI 产物" }
 Copy-Item -LiteralPath $latestExe.FullName -Destination $Out -Force
 Copy-Item -LiteralPath $latestMsi.FullName -Destination $Out -Force
 Copy-Item -LiteralPath "F:\Deepseek_harness\AI音乐处理\08_项目代码\ams-launcher\src-tauri\target\release\ams-launcher.exe" -Destination $Out -Force
+$updatesOut = Join-Path $Out "updates"
+$buildComponents = Join-Path $PSScriptRoot "build-components.ps1"
+& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $buildComponents -Out $updatesOut
+if ($LASTEXITCODE -ne 0) { throw "build-components failed: $LASTEXITCODE" }
 $files = Get-ChildItem -LiteralPath $Out -Recurse -File | Where-Object { $_.Name -ne "stage-manifest.json" }
 $components = foreach ($f in $files) {
     [ordered]@{
