@@ -57,7 +57,9 @@
               "plugin",
               "service",
               "tool",
-              "catalog"
+              "catalog",
+              "asset",
+              "runtime"
             ]
           },
           "version": {

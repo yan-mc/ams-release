@@ -65,7 +65,7 @@ def validate_manifest(obj):
             errors.append(tag + ".id 重复: " + cid)
         else:
             seen.add(cid)
-        if c.get("kind") not in ("launcher", "kernel", "plugin", "service", "tool", "catalog"):
+        if c.get("kind") not in ("launcher", "kernel", "plugin", "service", "tool", "catalog", "asset", "runtime"):
             errors.append(tag + ".kind 非法")
         if not isinstance(c.get("version"), str) or not c.get("version"):
             errors.append(tag + ".version 必须为非空字符串")
