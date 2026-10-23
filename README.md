@@ -1,5 +1,10 @@
 # ams-release
 
+> **AMS Studio 子项目 · 发布与更新源**  
+> 维护 `ams-update/1` 签名清单、组件打包工具、公开 Release 资产与更新 feed，是启动器在线安装/更新的数据源。  
+> 总仓库：https://github.com/yan-mc/AMS-Studio
+
+
 AMS 发布与更新：`ams-update/1` 清单签名/校验工具、发布脚本与示例。
 
 ## 目录
