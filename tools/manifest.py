@@ -77,6 +77,26 @@ def validate_manifest(obj):
             errors.append(tag + ".sha256 必须为 64 位 hex")
         if not isinstance(c.get("size"), int) or c.get("size", -1) < 0:
             errors.append(tag + ".size 必须为非负整数")
+        target = c.get("target")
+        if target is not None and (not isinstance(target, str) or not target or target.startswith("/") or ".." in target.replace("\\", "/").split("/")):
+            errors.append(tag + ".target 必须为 data 内相对路径")
+        parts = c.get("parts")
+        if parts is not None:
+            if not isinstance(parts, list) or not parts:
+                errors.append(tag + ".parts 必须为非空数组")
+            else:
+                for j, part in enumerate(parts):
+                    if not isinstance(part, dict):
+                        errors.append(tag + ".parts[%d] 必须是对象" % j)
+                        continue
+                    purl = part.get("url")
+                    if not isinstance(purl, str) or not (purl.startswith("https://") or purl.startswith("file:///")):
+                        errors.append(tag + ".parts[%d].url 非法" % j)
+                    psha = part.get("sha256")
+                    if not isinstance(psha, str) or len(psha) != 64:
+                        errors.append(tag + ".parts[%d].sha256 非法" % j)
+                    if not isinstance(part.get("size"), int) or part.get("size", -1) < 0:
+                        errors.append(tag + ".parts[%d].size 非法" % j)
     return errors
 
 

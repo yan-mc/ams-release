@@ -83,6 +83,21 @@
           "notes": {
             "type": "string"
           },
+          "target": {
+            "type": "string"
+          },
+          "parts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["url", "size", "sha256"],
+              "properties": {
+                "url": {"type": "string"},
+                "size": {"type": "integer", "minimum": 0},
+                "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+              }
+            }
+          },
           "mirrors": {
             "type": "array",
             "items": {
