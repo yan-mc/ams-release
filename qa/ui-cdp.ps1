@@ -85,7 +85,11 @@ if (-not (Test-Cdp)) {
 $pages = Invoke-RestMethod -Uri ('http://127.0.0.1:' + $CdpPort + '/json') -TimeoutSec 10
 $kernelPort = ([Uri]$KernelUrl).Port
 $page = $pages | Where-Object { $_.type -eq 'page' -and $_.url -match (':(' + $kernelPort + ')/') } | Select-Object -First 1
-if (-not $page) { $page = $pages | Where-Object { $_.type -eq 'page' } | Select-Object -First 1 }
+$needNavigate = $false
+if (-not $page) {
+  $page = $pages | Where-Object { $_.type -eq 'page' } | Select-Object -First 1
+  $needNavigate = $true
+}
 if (-not $page) { throw 'no page target found in Edge' }
 Log ('target page: ' + $page.url)
 
@@ -131,6 +135,13 @@ $null = Send-Cdp 'Runtime.enable' @{}
 $null = Send-Cdp 'Page.enable' @{}
 $null = Send-Cdp 'Log.enable' @{}
 Start-Sleep -Milliseconds 400
+
+# 若当前页面不是目标 Kernel，先导航过去（复用同一个 CDP 页面，避免测试到旧环境）
+if ($needNavigate) {
+  Log ('navigate -> ' + $KernelUrl)
+  $null = Send-Cdp 'Page.navigate' @{ url = $KernelUrl }
+  Start-Sleep -Seconds 4
+}
 
 $title = Eval 'document.title'
 $url = Eval 'location.href'
