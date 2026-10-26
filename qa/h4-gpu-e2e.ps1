@@ -85,7 +85,13 @@ function Wait-Job([string]$jobId, [int]$timeoutSec) {
 function Run-Case([string]$name, [string]$type, [hashtable]$params, [int]$timeoutSec, [scriptblock]$validate) {
   $item = [ordered]@{ name = $name; type = $type; params = $params; job_id = ''; status = 'FAIL'; detail = ''; artifacts = @() }
   try {
-    if ($null -eq $params -or $params.Count -eq 0 -or (@($params.Values) -contains $null) -or (@($params.Values) | Where-Object { $_ -is [string] -and $_ -eq '' })) {
+    if ($null -eq $params) {
+      $item.status = 'SKIP'
+      $item.detail = 'missing params'
+      return [pscustomobject]$item
+    }
+    $emptyValues = @($params.Values | Where-Object { $_ -is [string] -and $_ -eq '' })
+    if ($emptyValues.Count -gt 0) {
       $item.status = 'SKIP'
       $item.detail = 'missing fixture/params'
       return [pscustomobject]$item
@@ -100,7 +106,10 @@ function Run-Case([string]$name, [string]$type, [hashtable]$params, [int]$timeou
     $item.detail = ('status=' + $final.status + ' progress=' + $final.progress + ' stage=' + $final.stage + ' error=' + ($final.error | ConvertTo-Json -Compress))
     try {
       $arts = Invoke-Api 'GET' ('/jobs/' + $jobId + '/artifacts')
-      $list = if ($arts.artifacts) { $arts.artifacts } else { @($arts) }
+      # API 统一信封 { ok, data: [...] }，兼容旧结构 { artifacts: [...] }
+      if ($arts.data) { $list = @($arts.data) }
+      elseif ($arts.artifacts) { $list = @($arts.artifacts) }
+      else { $list = @($arts) }
       $item.artifacts = @($list | ForEach-Object { [pscustomobject]@{ name = $_.name; kind = $_.kind; bytes = $_.bytes; path = $_.path; sha256 = $_.sha256 } })
       if ($item.status -eq 'PASS' -and $validate) {
         $v = & $validate $final $list
