@@ -15,7 +15,8 @@ param(
   [string]$AmsHome = '',
   [string]$OutDir = '',
   [string]$H2Feed = '',
-  [string]$H3Feed = ''
+  [string]$H3Feed = '',
+  [string]$H4Feed = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -67,7 +68,7 @@ $matrix = [ordered]@{
   plugin_ui        = Get-Version (Join-Path $plugins 'packages\plugin-ui\package.json') '"version"\s*:\s*"([^"]+)"'
   gateway          = Get-Version (Join-Path $services 'gateway\pyproject.toml') '(?m)^version\s*=\s*"([^"]+)"'
 }
-$expect = '1.0.0-rc.1'
+$expect = '1.0.0-rc.2'
 $bad = $matrix.GetEnumerator() | Where-Object { $_.Value -ne $expect } | ForEach-Object { $_.Key + '=' + $_.Value }
 if ($bad.Count -eq 0) { Add-Step 'version-matrix' 'PASS' (($matrix.GetEnumerator() | ForEach-Object { $_.Key + '=' + $_.Value }) -join ' ') }
 else { Add-Step 'version-matrix' 'FAIL' ('not ' + $expect + ': ' + ($bad -join ', ')) }
@@ -83,10 +84,16 @@ $h3candidates = @(
   (Join-Path $ProjRoot '09_发布\当前\H3_1.0.0-rc.1\ams-components.json'),
   (Join-Path $ProjRoot '09_发布\_H2_KERNEL_FIX\h3-ams-components.json')
 )
+$h4candidates = @(
+  (Join-Path $ProjRoot '09_发布\当前\H4_1.0.0-rc.2_feed2051\ams-components.json'),
+  (Join-Path $ProjRoot '09_发布\当前\H5_1.0.0_feed2052\ams-components.json')
+)
 $h2Path = Resolve-Feed $H2Feed $h2candidates
 $h3Path = Resolve-Feed $H3Feed $h3candidates
+$h4Path = Resolve-Feed $H4Feed $h4candidates
 if ($h2Path) { Add-Step 'feed-h2-found' 'PASS' $h2Path } else { Add-Step 'feed-h2-found' 'FAIL' 'H2 feed missing' }
 if ($h3Path) { Add-Step 'feed-h3-found' 'PASS' $h3Path } else { Add-Step 'feed-h3-found' 'FAIL' 'H3 feed missing' }
+if ($h4Path) { Add-Step 'feed-h4-found' 'PASS' $h4Path } else { Add-Step 'feed-h4-found' 'WARN' 'H4/H5 feed not present yet' }
 
 # ---------- 3. feed sequence / 组件数 / 签名 ----------
 foreach ($item in @(@{ tag = 'h2'; path = $h2Path; seq = 2049 }, @{ tag = 'h3'; path = $h3Path; seq = 2050 })) {
@@ -144,6 +151,34 @@ if ($h3Path) {
   } else { Add-Step 'h3-setup-sha' 'FAIL' ('missing ' + $setupEntry.file) }
 }
 
+# ---------- 4b. H4/H5 feed 与本地物料核对 ----------
+if ($h4Path) {
+  $f4 = Get-Content -LiteralPath $h4Path -Raw -Encoding UTF8 | ConvertFrom-Json
+  Add-Step 'feed-h4-sequence' 'INFO' ('sequence=' + $f4.sequence + ' components=' + $f4.components.Count + ' product=' + $f4.product_version)
+  $sha4 = Get-Sha $h4Path
+  Add-Step 'feed-h4-sha256' 'INFO' $sha4
+  $verify4 = & $py (Join-Path $releaseDir 'tools\manifest.py') verify $h4Path --pub $pubKey 2>&1
+  if ($LASTEXITCODE -eq 0) { Add-Step 'feed-h4-signature' 'PASS' ($verify4 -join ' ') }
+  else { Add-Step 'feed-h4-signature' 'FAIL' ($verify4 -join ' ') }
+  $h4dir = Split-Path $h4Path -Parent
+  $setup4 = $f4.setup
+  $setup4Path = Join-Path $h4dir $setup4.file
+  if (Test-Path -LiteralPath $setup4Path) {
+    $sha = Get-Sha $setup4Path
+    Add-Step 'h4-setup-sha' $(if ($sha -eq $setup4.sha256) { 'PASS' } else { 'FAIL' }) ($setup4Path + ' ' + $sha)
+  } else { Add-Step 'h4-setup-sha' 'FAIL' ('missing ' + $setup4.file) }
+  foreach ($cid in @('service.gateway', 'plugin.ams.music.bundle')) {
+    $comp = $f4.components | Where-Object { $_.id -eq $cid } | Select-Object -First 1
+    if (-not $comp) { continue }
+    $name = Split-Path $comp.url -Leaf
+    $p = Join-Path $h4dir $name
+    if (Test-Path -LiteralPath $p) {
+      $sha = Get-Sha $p
+      Add-Step ('h4-' + $cid + '-sha') $(if ($sha -eq $comp.sha256) { 'PASS' } else { 'FAIL' }) ($p + ' ' + $sha)
+    } else { Add-Step ('h4-' + $cid + '-sha') 'WARN' ('local copy missing: ' + $name) }
+  }
+}
+
 # ---------- 5. Gateway / release 单元测试 ----------
 try {
   Push-Location (Join-Path $services 'gateway')
@@ -185,7 +220,7 @@ if (-not [string]::IsNullOrWhiteSpace($AmsHome)) {
 }
 
 # ---------- 7. 待执行项（本脚本不覆盖） ----------
-Add-Step 'h3-ui-cdp-12tabs' 'DEFERRED' 'run qa/ui-cdp.ps1 against running Kernel'
+Add-Step 'h3-ui-cdp-14tabs' 'DEFERRED' 'run qa/ui-cdp.ps1 against running Kernel (14 tabs for rc.1/rc.2)'
 Add-Step 'h3-gpu-e2e' 'DEFERRED' 'run qa/h4-gpu-e2e.ps1 (RVC/pymss/TTS/train/eval/mix)'
 Add-Step 'clean-feed-install' 'DEFERRED' 'strict fresh install from feed in a clean directory'
 
