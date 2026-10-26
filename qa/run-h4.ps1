@@ -168,7 +168,11 @@ if (-not [string]::IsNullOrWhiteSpace($AmsHome)) {
   if ((Test-Path -LiteralPath $portsFile) -and (Test-Path -LiteralPath $tokenFile)) {
     $ports = Get-Content -LiteralPath $portsFile -Raw -Encoding UTF8 | ConvertFrom-Json
     $token = (Get-Content -LiteralPath $tokenFile -Raw).Trim()
-    $port = if ($ports.gateway) { $ports.gateway } elseif ($ports.port) { $ports.port } else { $null }
+    # ports.json 形如 {"gateway": {"host":..., "port":..., ...}}
+    if ($ports.gateway -and $ports.gateway.port) { $port = $ports.gateway.port }
+    elseif ($ports.port) { $port = $ports.port }
+    elseif ($ports.gateway -is [int]) { $port = $ports.gateway }
+    else { $port = $null }
     if ($port) {
       try {
         $h = Invoke-RestMethod -Uri ('http://127.0.0.1:' + $port + '/api/v1/health') -Headers @{ Authorization = 'Bearer ' + $token } -TimeoutSec 10

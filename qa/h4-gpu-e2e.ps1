@@ -34,17 +34,19 @@ $tokenFile = Join-Path $amsHomeFull 'runtime\gateway.token'
 if (-not (Test-Path -LiteralPath $portsFile)) { throw ('ports.json missing: ' + $portsFile) }
 if (-not (Test-Path -LiteralPath $tokenFile)) { throw ('gateway.token missing: ' + $tokenFile) }
 $ports = Get-Content -LiteralPath $portsFile -Raw -Encoding UTF8 | ConvertFrom-Json
+# ports.json 形如 {"gateway": {"host":..., "port":..., "pid":..., "api_prefix":..., "token_file":...}}
 $port = $null
-foreach ($field in @('gateway', 'port', 'http')) {
-  if ($ports.PSObject.Properties.Name -contains $field -and $ports.$field) { $port = $ports.$field; break }
-}
+if ($ports.gateway -and $ports.gateway.port) { $port = $ports.gateway.port }
+elseif ($ports.port) { $port = $ports.port }
+elseif ($ports.gateway -is [int]) { $port = $ports.gateway }
 if (-not $port) {
   $intProp = $ports.PSObject.Properties | Where-Object { $_.Value -is [int] -or $_.Value -is [long] } | Select-Object -First 1
   if ($intProp) { $port = $intProp.Value }
 }
 if (-not $port) { throw 'cannot determine gateway port from ports.json' }
 $token = (Get-Content -LiteralPath $tokenFile -Raw).Trim()
-$base = 'http://127.0.0.1:' + $port + '/api/v1'
+$hostAddr = if ($ports.gateway -and $ports.gateway.host) { $ports.gateway.host } else { '127.0.0.1' }
+$base = 'http://' + $hostAddr + ':' + $port + '/api/v1'
 $headers = @{ Authorization = 'Bearer ' + $token }
 Write-Output ('Gateway: ' + $base + '  AMS_HOME=' + $amsHomeFull)
 
